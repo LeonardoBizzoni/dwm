@@ -12,21 +12,23 @@ static       int smartgaps          = 0;        /* 1 means no outer gap when the
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
 static const int user_bh            = 27;        /* 0 means that dwm will calculate bar height, >= 1 means dwm will user_bh as bar height */
-static const char *fonts[]          = { "hack:pixelsize=14:antialias=true:autohint=true" , "JoyPixels:style=Regular:pixelsize=14:antialias=true:autohint=true" };
+static const char *fonts[]          = {"hack:pixelsize=14:antialias=true:autohint=true"};
+
 static const char dmenufont[]       = "hack:pixelsize=14:antialias=true:autohint=true";
 
-static const char unfocues_border[]	= "#2a2a2a";
-static const char selected[]	    = "#fabd2f";
-static const char bar_fg1[]	        = "#282828";
-static const char unfocues_fg[]     = "#ebdbb2";
+static const char unfocues_border[]	= "#282a36";
 
-static const unsigned int baralpha = 0xd0;
+static const char selected[]	    = "#6699df";
+static const char bar_fg1[]	        = "#bd93f9";
+static const char unfocues_fg[]     = "#282a36";
+
+static const unsigned int baralpha = 0xf0;
 static const unsigned int borderalpha = OPAQUE;
 
 static const char *colors[][3]      = {
 	/*               fg         bg         border   */
-	[SchemeNorm] = { unfocues_fg, bar_fg1,  unfocues_border},
-	[SchemeSel]  = { bar_fg1,   selected,   selected},
+	[SchemeNorm] = { "#f8f8f2", unfocues_fg,  unfocues_border},
+	[SchemeSel]  = { "#f8f8f2", "#545771",   selected},
 };
 
 static const unsigned int alphas[][3]      = {
@@ -46,7 +48,6 @@ static const Rule rules[] = {
 
 	/* class     instance  title           tags mask  isfloating  isterminal  noswallow  monitor */
 	{ "Gimp",           NULL,     NULL,           0,         1,          0,           0,        -1 },
-	{ "Firefox",        NULL,     NULL,           1 << 8,    0,          0,          -1,        -1 },
 	{ "St",             NULL,     NULL,           0,         0,          1,           0,        -1 },
 	{ "Alacritty",      NULL,     NULL,           0,         0,          1,           0,        -1 },
 	{ NULL,             NULL,     "Event Tester", 0,         0,          0,           1,        -1 }, /* xev */
@@ -92,7 +93,7 @@ static const Layout layouts[] = {
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-static const char *dmenucmd[] = { "dmenu_run", "-h", "27", "-m", dmenumon, "-fn", dmenufont, "-nb", unfocues_border, "-nf", unfocues_fg, "-sb", selected, "-sf", bar_fg1, NULL };
+static const char *dmenucmd[] = { "dmenu_run", "-h", "27", "-m", dmenumon, "-fn", dmenufont, "-nb",unfocues_fg , "-nf", "#f8f8f2", "-sb", selected, "-sf", unfocues_fg, NULL };
 static const char *termcmd[]  = { "alacritty", NULL };
 
 static Key keys[] = {
@@ -102,7 +103,7 @@ static Key keys[] = {
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
-	{ MODKEY,                       XK_i,      incnmaster,     {.i = +1 } },
+	{ MODKEY,                       XK_s,      incnmaster,     {.i = +1 } },
 	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
 	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },
 	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
@@ -140,6 +141,8 @@ static Key keys[] = {
 	{ MODKEY|ControlMask,    XK_0,      togglegaps,     {0} },
 	{ MODKEY|ControlMask|ShiftMask,    XK_0,      defaultgaps,    {0} },
 
+	{ MODKEY,       XK_w,	        spawn,		SHCMD("brave") },
+
 	{ MODKEY|ControlMask,  XK_F6,      incrihgaps,     {.i = +1 } },
 	{ MODKEY|ShiftMask,    XK_F6,      incrihgaps,     {.i = -1 } },
 	{ MODKEY,              XK_F7,      incrivgaps,     {.i = +1 } },
@@ -159,9 +162,9 @@ static Key keys[] = {
 	TAGKEYS(                        XK_9,                      8)
 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
 
-	{ 0, XK_F2,	        spawn,		SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
-	{ 0, XK_F3,	        spawn,		SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
-	{ 0, XK_F4,         spawn,		SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
+	{ 0,       XK_F2,	        spawn,		SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
+	{ 0,       XK_F3,	        spawn,		SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
+	{ 0,       XK_F4,          spawn,		SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
 };
 
 /* button definitions */

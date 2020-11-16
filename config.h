@@ -8,33 +8,21 @@ static const unsigned int gappih    = 20;       /* horiz inner gap between windo
 static const unsigned int gappiv    = 10;       /* vert inner gap between windows */
 static const unsigned int gappoh    = 10;       /* horiz outer gap between windows and screen edge */
 static const unsigned int gappov    = 10;       /* vert outer gap between windows and screen edge */
-static       int smartgaps          = 0;        /* 1 means no outer gap when there is only one window */
+static       int smartgaps          = 1;        /* 1 means no outer gap when there is only one window */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
-static const int user_bh            = 27;        /* 0 means that dwm will calculate bar height, >= 1 means dwm will user_bh as bar height */
-static const char *fonts[]          = {"hack:pixelsize=14:antialias=true:autohint=true"};
+static const int user_bh            = 22;        /* 0 means that dwm will calculate bar height, >= 1 means dwm will user_bh as bar height */
+static const char *fonts[]          = { "hack:pixelsize=12:antialias=true:autohint=true" };
+static const char dmenufont[]       = "hack:pixelsize=12:antialias=true:autohint=true";
 
-static const char dmenufont[]       = "hack:pixelsize=14:antialias=true:autohint=true";
-
-static const char unfocues_border[]	= "#282a36";
-
-static const char selected[]	    = "#6699df";
-static const char bar_fg1[]	        = "#bd93f9";
-static const char unfocues_fg[]     = "#282a36";
-
-static const unsigned int baralpha = 0xf0;
-static const unsigned int borderalpha = OPAQUE;
-
+static const char unfocused[]   	= "#282828";
+static const char selected[]	    = "#fabd2f";
+static const char normalFont[]      = "#ebdbb2";
+static const char focusFont[]       = "#282828";
 static const char *colors[][3]      = {
 	/*               fg         bg         border   */
-	[SchemeNorm] = { "#f8f8f2", unfocues_fg,  unfocues_border},
-	[SchemeSel]  = { "#f8f8f2", "#545771",   selected},
-};
-
-static const unsigned int alphas[][3]      = {
-	/*               fg      bg        border     */
-	[SchemeNorm] = { OPAQUE, baralpha, borderalpha },
-	[SchemeSel]  = { OPAQUE, baralpha, borderalpha },
+	[SchemeNorm] = { normalFont , unfocused , unfocused },
+	[SchemeSel]  = { focusFont  , selected  , selected  },
 };
 
 /* tagging */
@@ -45,12 +33,10 @@ static const Rule rules[] = {
 	 *	WM_CLASS(STRING) = instance, class
 	 *	WM_NAME(STRING) = title
 	 */
-
 	/* class     instance  title           tags mask  isfloating  isterminal  noswallow  monitor */
-	{ "Gimp",           NULL,     NULL,           0,         1,          0,           0,        -1 },
-	{ "St",             NULL,     NULL,           0,         0,          1,           0,        -1 },
-	{ "Alacritty",      NULL,     NULL,           0,         0,          1,           0,        -1 },
-	{ NULL,             NULL,     "Event Tester", 0,         0,          0,           1,        -1 }, /* xev */
+	{ "Gimp",    NULL,     NULL,           0,         1,          0,           0,        -1 },
+	{ "St",      NULL,     NULL,           0,         0,          1,           0,        -1 },
+	{ NULL,      NULL,     "Event Tester", 0,         0,          0,           1,        -1 }, /* xev */
 };
 
 /* layout(s) */
@@ -64,7 +50,6 @@ static const int resizehints = 1;    /* 1 means respect size hints in tiled resi
 static const Layout layouts[] = {
 	/* symbol     arrange function */
 	{ "[]=",      tile },    /* first entry is default */
-	{ "><>",      NULL },    /* no layout function means floating behavior */
 	{ "[M]",      monocle },
 	{ "[@]",      spiral },
 	{ "[\\]",     dwindle },
@@ -77,6 +62,7 @@ static const Layout layouts[] = {
 	{ ":::",      gaplessgrid },
 	{ "|M|",      centeredmaster },
 	{ ">M>",      centeredfloatingmaster },
+	{ "><>",      NULL },    /* no layout function means floating behavior */
 	{ NULL,       NULL },
 };
 
@@ -93,8 +79,12 @@ static const Layout layouts[] = {
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-static const char *dmenucmd[] = { "dmenu_run", "-h", "27", "-m", dmenumon, "-fn", dmenufont, "-nb",unfocues_fg , "-nf", "#f8f8f2", "-sb", selected, "-sf", unfocues_fg, NULL };
-static const char *termcmd[]  = { "alacritty", NULL };
+static const char *dmenucmd[] = { "dmenu_run", "-h", "22","-m", dmenumon, "-fn", dmenufont, "-nb", unfocused, "-nf", normalFont, "-sb", selected, "-sf", unfocused, NULL };
+static const char *termcmd[]  = { "st", NULL };
+
+/* commands spawned when clicking statusbar, the mouse button pressed is exported as BUTTON */
+static char *statuscmds[] = { "notify-send Mouse$BUTTON" };
+static char *statuscmd[] = { "/bin/sh", "-c", NULL, NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -112,7 +102,6 @@ static Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_w,      killclient,     {0} },
 
 	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },	//Tiling
-	{ MODKEY,			            XK_y,      fullscreen,     {0} },					//Full Screen
 	{ MODKEY,                       XK_u,      setlayout,      {.v = &layouts[2]} },	//Monocole
 	{ MODKEY,                       XK_i,      setlayout,      {.v = &layouts[3]} },	//Fibonacci
 	{ MODKEY,			            XK_o,      setlayout,      {.v = &layouts[12]} },	//Centered master
@@ -143,14 +132,6 @@ static Key keys[] = {
 
 	{ MODKEY,       XK_w,	        spawn,		SHCMD("brave") },
 
-	{ MODKEY|ControlMask,  XK_F6,      incrihgaps,     {.i = +1 } },
-	{ MODKEY|ShiftMask,    XK_F6,      incrihgaps,     {.i = -1 } },
-	{ MODKEY,              XK_F7,      incrivgaps,     {.i = +1 } },
-	{ MODKEY|ShiftMask,    XK_F7,      incrivgaps,     {.i = -1 } },
-	{ MODKEY,              XK_F8,      incrohgaps,     {.i = +1 } },
-	{ MODKEY|ShiftMask,    XK_F8,      incrohgaps,     {.i = -1 } },
-	{ MODKEY,              XK_F9,      incrovgaps,     {.i = +1 } },
-	{ MODKEY|ShiftMask,    XK_F9,      incrovgaps,     {.i = -1 } },
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
 	TAGKEYS(                        XK_3,                      2)
@@ -162,9 +143,12 @@ static Key keys[] = {
 	TAGKEYS(                        XK_9,                      8)
 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
 
-	{ 0,       XK_F2,	        spawn,		SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
-	{ 0,       XK_F3,	        spawn,		SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
-	{ 0,       XK_F4,          spawn,		SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
+	{ MODKEY,       XK_F2,	        spawn,		SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
+	{ MODKEY,       XK_F3,	        spawn,		SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
+	{ MODKEY,       XK_F4,          spawn,		SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
+
+    { MODKEY|ShiftMask,             XK_u, spawn,      SHCMD("sudo usbmount")  },
+    { MODKEY|ShiftMask|ControlMask, XK_u, spawn,      SHCMD("sudo usbumount") },
 };
 
 /* button definitions */
@@ -174,9 +158,9 @@ static Button buttons[] = {
 	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
 	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
-	{ ClkStatusText,        0,              Button1,        sigdwmblocks,   {.i = 1} },
-	{ ClkStatusText,        0,              Button2,        sigdwmblocks,   {.i = 2} },
-	{ ClkStatusText,        0,              Button3,        sigdwmblocks,   {.i = 3} },
+	{ ClkStatusText,        0,              Button1,        spawn,          {.v = statuscmd } },
+	{ ClkStatusText,        0,              Button2,        spawn,          {.v = statuscmd } },
+	{ ClkStatusText,        0,              Button3,        spawn,          {.v = statuscmd } },
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },

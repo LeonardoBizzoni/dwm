@@ -1,14 +1,6 @@
 --- dwm.c
 +++ dwm.c
-@@ -170,6 +171,7 @@ static void focus(Client *c);
- static void focusin(XEvent *e);
- static void focusmon(const Arg *arg);
- static void focusstack(const Arg *arg);
-+static int getdwmblockspid();
- static int getrootptr(int *x, int *y);
- static long getstate(Window w);
- static int gettextprop(Window w, Atom atom, char *text, unsigned int size);
-@@ -444,9 +450,26 @@ buttonpress(XEvent *e)
+@@ -444,9 +449,26 @@ buttonpress(XEvent *e)
  			arg.ui = 1 << i;
  		} else if (ev->x < x + blw)
  			click = ClkLtSymbol;
@@ -20,7 +12,7 @@
 +			char *text = rawstext;
 +			int i = -1;
 +			char ch;
-+			dwmblockssig = 0;
++			statuscmdn = 0;
 +			while (text[++i]) {
 +				if ((unsigned char)text[i] < ' ') {
 +					ch = text[i];
@@ -30,7 +22,7 @@
 +					text += i+1;
 +					i = -1;
 +					if (x >= ev->x) break;
-+					dwmblockssig = ch;
++					if (ch <= LENGTH(statuscmds)) statuscmdn = ch - 1;
 +				}
 +			}
 +		} else

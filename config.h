@@ -19,10 +19,20 @@ static const char unfocused[]   	= "#282828";
 static const char selected[]	    = "#fabd2f";
 static const char normalFont[]      = "#ebdbb2";
 static const char focusFont[]       = "#282828";
+static const char col_gray1[]       = "#222222";
+static const char col_gray2[]       = "#444444";
+static const char col_gray3[]       = "#bbbbbb";
+static const char col_gray4[]       = "#eeeeee";
+static const char col_cyan[]        = "#005577";
 static const char *colors[][3]      = {
 	/*               fg         bg         border   */
 	[SchemeNorm] = { normalFont , unfocused , unfocused },
-	[SchemeSel]  = { focusFont  , selected  , selected  },
+	[SchemeSel]  = { unfocused, selected  , selected  },
+	[SchemeStatus]  = { unfocused, selected,  "#000000"  }, // Statusbar right {text,background,not used but cannot be empty}
+	[SchemeTagsSel]  = { unfocused, selected,  "#000000"  }, // Tagbar left selected {text,background,not used but cannot be empty}
+    [SchemeTagsNorm]  = { normalFont, unfocused,  "#000000"  }, // Tagbar left unselected {text,background,not used but cannot be empty}
+    [SchemeInfoSel]  = { normalFont, unfocused,  "#000000"  }, // infobar middle  selected {text,background,not used but cannot be empty}
+    [SchemeInfoNorm]  = { normalFont, unfocused,  "#000000"  }, // infobar middle  unselected {text,background,not used but cannot be empty}
 };
 
 /* tagging */
@@ -80,7 +90,7 @@ static const Layout layouts[] = {
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-h", "22","-m", dmenumon, "-fn", dmenufont, "-nb", unfocused, "-nf", normalFont, "-sb", selected, "-sf", unfocused, NULL };
-static const char *termcmd[]  = { "st", NULL };
+static const char *termcmd[]  = { "alacritty", NULL };
 
 /* commands spawned when clicking statusbar, the mouse button pressed is exported as BUTTON */
 static char *statuscmds[] = { "notify-send Mouse$BUTTON" };

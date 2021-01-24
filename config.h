@@ -1,4 +1,5 @@
 /* See LICENSE file for copyright and license details. */
+#include <X11/XF86keysym.h>
 
 /* appearance */
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
@@ -11,7 +12,7 @@ static const unsigned int gappov    = 10;       /* vert outer gap between window
 static       int smartgaps          = 1;        /* 1 means no outer gap when there is only one window */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
-static const int user_bh            = 22;        /* 0 means that dwm will calculate bar height, >= 1 means dwm will user_bh as bar height */
+static const int user_bh            = 21;        /* 0 means that dwm will calculate bar height, >= 1 means dwm will user_bh as bar height */
 static const char *fonts[]          = { "hack:pixelsize=12:antialias=true:autohint=true" };
 static const char dmenufont[]       = "hack:pixelsize=12:antialias=true:autohint=true";
 
@@ -21,9 +22,6 @@ static const char normalFont[]      = "#ebdbb2";
 static const char focusFont[]       = "#282828";
 static const char col_gray1[]       = "#222222";
 static const char col_gray2[]       = "#444444";
-static const char col_gray3[]       = "#bbbbbb";
-static const char col_gray4[]       = "#eeeeee";
-static const char col_cyan[]        = "#005577";
 static const char *colors[][3]      = {
 	/*               fg         bg         border   */
 	[SchemeNorm] = { normalFont , unfocused , unfocused },
@@ -44,9 +42,9 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class     instance  title           tags mask  isfloating  isterminal  noswallow  monitor */
-	{ "Gimp",    NULL,     NULL,           0,         1,          0,           0,        -1 },
-	{ "St",      NULL,     NULL,           0,         0,          1,           0,        -1 },
-	{ NULL,      NULL,     "Event Tester", 0,         0,          0,           1,        -1 }, /* xev */
+	{ "St",         NULL,     NULL,           0,         0,          1,           0,        -1 },
+	{ "Alacritty",  NULL,     NULL,           0,         0,          1,           0,        -1 },
+	{ NULL,         NULL,     "Event Tester", 0,         0,          0,           1,        -1 }, /* xev */
 };
 
 /* layout(s) */
@@ -89,8 +87,8 @@ static const Layout layouts[] = {
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-static const char *dmenucmd[] = { "dmenu_run", "-h", "22","-m", dmenumon, "-fn", dmenufont, "-nb", unfocused, "-nf", normalFont, "-sb", selected, "-sf", unfocused, NULL };
-static const char *termcmd[]  = { "alacritty", NULL };
+static const char *dmenucmd[] = { "dmenu_run", "-h", "21","-m", dmenumon, "-fn", dmenufont, "-nb", unfocused, "-nf", normalFont, "-sb", selected, "-sf", unfocused, NULL };
+static const char *termcmd[]  = { "st", NULL };
 
 /* commands spawned when clicking statusbar, the mouse button pressed is exported as BUTTON */
 static char *statuscmds[] = { "notify-send Mouse$BUTTON" };
@@ -109,13 +107,15 @@ static Key keys[] = {
 	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
 	{ MODKEY|ShiftMask,             XK_Return, zoom,           {0} },
 	{ MODKEY,                       XK_Tab,    view,           {0} },
-	{ MODKEY|ShiftMask,             XK_w,      killclient,     {0} },
+	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
 
-	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },	//Tiling
-	{ MODKEY,                       XK_u,      setlayout,      {.v = &layouts[2]} },	//Monocole
-	{ MODKEY,                       XK_i,      setlayout,      {.v = &layouts[3]} },	//Fibonacci
-	{ MODKEY,			            XK_o,      setlayout,      {.v = &layouts[12]} },	//Centered master
-	{ MODKEY,                       XK_space,  setlayout,      {0} },					//???
+	{ MODKEY,                       XK_q,      setlayout,      {.v = &layouts[0]} },
+	{ MODKEY,                       XK_w,      setlayout,      {.v = &layouts[1]} },
+	{ MODKEY,                       XK_e,      setlayout,      {.v = &layouts[3]} },
+	{ MODKEY,                       XK_r,      setlayout,      {.v = &layouts[4]} },
+	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[5]} },
+	{ MODKEY,			            XK_y,      setlayout,      {.v = &layouts[11]} },
+	{ MODKEY,                       XK_space,  setlayout,      {0} },
 	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },					//Toggle floating mode
 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
 	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
@@ -140,7 +140,7 @@ static Key keys[] = {
 	{ MODKEY|ControlMask,    XK_0,      togglegaps,     {0} },
 	{ MODKEY|ControlMask|ShiftMask,    XK_0,      defaultgaps,    {0} },
 
-	{ MODKEY,       XK_w,	        spawn,		SHCMD("brave") },
+	{ MODKEY|ShiftMask,       XK_w,	        spawn,		SHCMD("firefox") },
 
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
@@ -156,9 +156,6 @@ static Key keys[] = {
 	{ MODKEY,       XK_F2,	        spawn,		SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
 	{ MODKEY,       XK_F3,	        spawn,		SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
 	{ MODKEY,       XK_F4,          spawn,		SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
-
-    { MODKEY|ShiftMask,             XK_u, spawn,      SHCMD("sudo usbmount")  },
-    { MODKEY|ShiftMask|ControlMask, XK_u, spawn,      SHCMD("sudo usbumount") },
 };
 
 /* button definitions */

@@ -12,9 +12,9 @@ static const unsigned int gappov    = 10;       /* vert outer gap between window
 static       int smartgaps          = 1;        /* 1 means no outer gap when there is only one window */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
-static const int user_bh            = 21;        /* 0 means that dwm will calculate bar height, >= 1 means dwm will user_bh as bar height */
-static const char *fonts[]          = { "hack:pixelsize=12:antialias=true:autohint=true" };
-static const char dmenufont[]       = "hack:pixelsize=12:antialias=true:autohint=true";
+static const int user_bh            = 27;        /* 0 means that dwm will calculate bar height, >= 1 means dwm will user_bh as bar height */
+static const char *fonts[]          = { "hack:pixelsize=14:antialias=true:autohint=true" };
+static const char dmenufont[]       = "hack:pixelsize=14:antialias=true:autohint=true";
 
 static const char unfocused[]   	= "#282828";
 static const char selected[]	    = "#fabd2f";
@@ -58,18 +58,11 @@ static const int resizehints = 1;    /* 1 means respect size hints in tiled resi
 static const Layout layouts[] = {
 	/* symbol     arrange function */
 	{ "[]=",      tile },    /* first entry is default */
+	{ "###",      nrowgrid },
 	{ "[M]",      monocle },
-	{ "[@]",      spiral },
-	{ "[\\]",     dwindle },
 	{ "H[]",      deck },
 	{ "TTT",      bstack },
-	{ "===",      bstackhoriz },
-	{ "HHH",      grid },
-	{ "###",      nrowgrid },
-	{ "---",      horizgrid },
-	{ ":::",      gaplessgrid },
 	{ "|M|",      centeredmaster },
-	{ ">M>",      centeredfloatingmaster },
 	{ "><>",      NULL },    /* no layout function means floating behavior */
 	{ NULL,       NULL },
 };
@@ -87,7 +80,7 @@ static const Layout layouts[] = {
 
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
-static const char *dmenucmd[] = { "dmenu_run", "-h", "21","-m", dmenumon, "-fn", dmenufont, "-nb", unfocused, "-nf", normalFont, "-sb", selected, "-sf", unfocused, NULL };
+static const char *dmenucmd[] = { "dmenu_run", "-h", "27","-m", dmenumon, "-fn", dmenufont, "-nb", unfocused, "-nf", normalFont, "-sb", selected, "-sf", unfocused, NULL };
 static const char *termcmd[]  = { "st", NULL };
 
 /* commands spawned when clicking statusbar, the mouse button pressed is exported as BUTTON */
@@ -105,20 +98,17 @@ static Key keys[] = {
 	{ MODKEY,                       XK_d,      incnmaster,     {.i = -1 } },
 	{ MODKEY,                       XK_h,      setmfact,       {.f = -0.05} },
 	{ MODKEY,                       XK_l,      setmfact,       {.f = +0.05} },
-	{ MODKEY|ShiftMask,             XK_Return, zoom,           {0} },
-	{ MODKEY,                       XK_Tab,    view,           {0} },
+	{ MODKEY|ShiftMask,             XK_Return, zoom,           {0} }, //Promote window to master
+	{ MODKEY|ControlMask,           XK_Tab,    view,           {0} }, //Next workspace with a window open
 	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
 
-	{ MODKEY,                       XK_q,      setlayout,      {.v = &layouts[0]} },
-	{ MODKEY,                       XK_w,      setlayout,      {.v = &layouts[1]} },
-	{ MODKEY,                       XK_e,      setlayout,      {.v = &layouts[3]} },
-	{ MODKEY,                       XK_r,      setlayout,      {.v = &layouts[4]} },
-	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[5]} },
-	{ MODKEY,			            XK_y,      setlayout,      {.v = &layouts[11]} },
-	{ MODKEY,                       XK_space,  setlayout,      {0} },
-	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },					//Toggle floating mode
-	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
-	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
+	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} }, //Change layout to the first one
+	{ MODKEY,                       XK_Tab,    cyclelayout,    {.i = +1 } },
+	{ MODKEY|ShiftMask,             XK_Tab,    cyclelayout,    {.i = -1 } },
+	{ MODKEY,                       XK_space,  setlayout,      {0} }, //Switch to last used layout
+	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} }, //Toggle floating for a window
+	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } }, //Combine all tags in one
+	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } }, //Sticky window
 	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
 	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
@@ -137,10 +127,24 @@ static Key keys[] = {
 	{ MODKEY,	 		   			XK_minus,  incrogaps,      {.i = -1 } },
 
 	//Gaps settings
-	{ MODKEY|ControlMask,    XK_0,      togglegaps,     {0} },
-	{ MODKEY|ControlMask|ShiftMask,    XK_0,      defaultgaps,    {0} },
+	{ MODKEY|ControlMask,           XK_0,      togglegaps,     {0} },
+	{ MODKEY|ControlMask|ShiftMask, XK_0,      defaultgaps,    {0} },
 
-	{ MODKEY|ShiftMask,       XK_w,	        spawn,		SHCMD("firefox") },
+    // Custom keys
+    // Spawn programs
+	{ MODKEY,                       XK_w,	   spawn,		   SHCMD("firefox") },
+	{ MODKEY,	 		   			XK_f,      spawn,          SHCMD("pcmanfm") },
+	{ MODKEY,	 		   			XK_v,      spawn,          SHCMD("st -e nvim") },
+
+    // Prompts
+	{ MODKEY|ShiftMask,            XK_w,      spawn,          SHCMD("websites") },
+
+	{ MODKEY,	 		   			XK_x,      spawn,          SHCMD("picom") },
+	{ MODKEY|ShiftMask,             XK_x,      spawn,          SHCMD("pkill picom") },
+
+    /*
+	{ MODKEY,	 		   			XK_f,      spawn,          SHCMD("") },
+    */
 
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
@@ -153,9 +157,18 @@ static Key keys[] = {
 	TAGKEYS(                        XK_9,                      8)
 	{ MODKEY|ShiftMask,             XK_q,      quit,           {0} },
 
-	{ MODKEY,       XK_F2,	        spawn,		SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
-	{ MODKEY,       XK_F3,	        spawn,		SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
-	{ MODKEY,       XK_F4,          spawn,		SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
+    // Multimedia keys
+
+	{ MODKEY,       XK_F6,          spawn,		SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)") },
+	{ MODKEY,       XK_F7,	        spawn,		SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)") },
+	{ MODKEY,       XK_F8,	        spawn,		SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)") },
+
+	{ MODKEY,       XK_F2,          spawn,		SHCMD("xbacklight -dec 10") },
+	{ MODKEY,       XK_F3,          spawn,		SHCMD("xbacklight -inc 10") },
+
+    { 0, XF86XK_AudioMute, spawn, SHCMD("pamixer -t; kill -44 $(pidof dwmblocks)")},
+    { 0, XF86XK_AudioLowerVolume, spawn, SHCMD("pamixer --allow-boost -d 3; kill -44 $(pidof dwmblocks)")},
+    { 0, XF86XK_AudioRaiseVolume, spawn, SHCMD("pamixer --allow-boost -i 3; kill -44 $(pidof dwmblocks)")},
 };
 
 /* button definitions */
